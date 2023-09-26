@@ -1,28 +1,58 @@
 import './App.css'
 import { Component } from 'react'
+import CardList from './components/card-list/card-list.component';
+import SearchBox from './components/search-box/search-box.component';
 
 interface IState {
 name : string;
 company : string;
 }
-class App extends Component<any,IState> {
+class App extends Component<any,any> {
 
   constructor(props : any){
     super(props);
 
     this.state  = {
-      name : "Rohit",
-      company:"Invimatic"
+    monsters : [
+    ],
+    searchField : ""
     };
+    console.log("constructor")
+  }
+  componentDidMount(): void {
+    console.log('componentdidmount')
+      fetch('https://jsonplaceholder.typicode.com/users')
+      .then((response)=> response.json())
+      .then((users)=> this.setState(()=> {return {monsters : users}} , () =>{console.log(this.state)}))
+  } // life-cycle methods
+  onSearchChange = (event : any)=>{
+    const searchString = event.target.value.toLocaleLowerCase();
+  
+    this.setState(()=>{return {searchField : searchString}},()=>{})
   }
   render() {
+    const {monsters, searchField} = this.state;
+    const {onSearchChange} = this;
+    console.log('render')
+    const filteredMonsters = monsters.filter((monster: any)=>{
+      return monster.name.toLocaleLowerCase().includes(searchField);
+    })
     return (
     <>
-      <p>Hi {this.state.name}</p>
-      <button onClick={()=>{
-        // this.setState({name : "Pranit"})
-        this.setState((prev)=>{return {...prev , name : "Pranit"}},()=>{console.log(this.state)})
-      }}>Change Name</button>
+    <div className='App'>
+    {/* <input 
+    className='search-box' 
+    type='serch' 
+    placeholder='search monsters'
+    onChange={onSearchChange}
+
+    />
+     {filteredMonsters.map((monster: any)=>{
+      return <h1 key={monster.id}>{monster.name}</h1>
+     })} */}
+     <SearchBox onChangeHandler = {onSearchChange} placeholder ='Search Monsters' className='search-box' />
+     <CardList monsters={filteredMonsters}   />
+     </div>
     </>
   )}
  
@@ -30,8 +60,3 @@ class App extends Component<any,IState> {
 
 export default App
 
-// const obj1 = {name  : "Rohit"}
-// const obj3 = Object.assign({}, obj1)
-//setState , In this method we pass in object which we want to shallow merge with state object. 
-// state in react updates asynchronously 
-// to perform any process synchronoulsy after state is updated , use callback function
